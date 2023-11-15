@@ -1,4 +1,4 @@
-package com.pgleqi.plugins
+package com.pgleqi.controller.plugins
 
 import io.github.smiley4.ktorswaggerui.SwaggerUI
 import io.ktor.server.application.*

@@ -1,6 +1,7 @@
 package com.pgleqi
 
-import com.pgleqi.plugins.*
+import com.pgleqi.controller.plugins.*
+import com.pgleqi.service.AppService
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -16,4 +17,6 @@ fun Application.module() {
     configureSerialization()
     configureRouting()
     configureSwaggerUi()
+
+    AppService.loadAppSettings()
 }

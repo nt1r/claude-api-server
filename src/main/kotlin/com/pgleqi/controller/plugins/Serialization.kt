@@ -1,4 +1,4 @@
-package com.pgleqi.plugins
+package com.pgleqi.controller.plugins
 
 import io.ktor.serialization.gson.*
 import io.ktor.server.application.*
