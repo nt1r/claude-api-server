@@ -1,16 +1,16 @@
 package com.pgleqi.service
 
 import com.google.gson.JsonParser
-import com.pgleqi.constant.baseHttpClient
-import com.pgleqi.constant.gson
-import com.pgleqi.constant.organizationUrl
+import com.pgleqi.constant.*
 import com.pgleqi.model.AppSettings
+import com.pgleqi.model.Conversation
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
 
 object AppService {
     private lateinit var appSettings: AppSettings
@@ -47,6 +47,25 @@ object AppService {
                 println(e)
                 println("Check if you are in unavailable region!")
             }
+        }
+    }
+
+    suspend fun getAllConversations(): List<Conversation> {
+        try {
+            val response = baseHttpClient.get(conversationUrl.format(organizationId)) {
+                headers {
+                    append(HttpHeaders.Cookie, appSettings.cookie)
+                }
+            }
+            if (response.status != HttpStatusCode.OK) {
+                println("getAllConversations network error!")
+                return emptyList()
+            }
+
+            return gson.fromJson<List<Conversation>>(response.bodyAsText(), gsonListTypeToken<Conversation>()).toList()
+        } catch (e: Exception) {
+            println(e)
+            return emptyList()
         }
     }
 }

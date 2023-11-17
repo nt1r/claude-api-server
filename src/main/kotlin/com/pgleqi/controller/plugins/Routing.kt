@@ -1,26 +1,18 @@
 package com.pgleqi.controller.plugins
 
+import com.pgleqi.service.AppService
 import io.github.smiley4.ktorswaggerui.dsl.get
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     routing {
-        get("/hello-world", {
-            description = "Hello World Endpoint."
-            response {
-                HttpStatusCode.OK to {
-                    description = "Successful request."
-                    body<String> { description = "Response body" }
-                }
-                HttpStatusCode.InternalServerError to {
-                    description = "Internal server error."
-                }
-            }
+        get("/conversations", {
+            description = "Get all conversations Endpoint."
         }) {
-            call.respondText("Hello World!")
+            val conversations = AppService.getAllConversations()
+            call.respond(conversations)
         }
     }
 }
