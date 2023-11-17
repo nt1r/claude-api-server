@@ -18,5 +18,5 @@ fun Application.module() {
     configureRouting()
     configureSwaggerUi()
 
-    AppService.loadAppSettings()
+    AppService.init()
 }
