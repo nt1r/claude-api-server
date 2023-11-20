@@ -17,6 +17,8 @@ jobs:
           java-version: 17
 
       - name: Build
+        env:
+          super_secret: ${{ secrets.COOKIE }}
         run: |
           chmod +x ./gradlew
           ./gradlew clean

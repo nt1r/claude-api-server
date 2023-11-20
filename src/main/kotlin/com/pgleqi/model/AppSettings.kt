@@ -1,5 +1,5 @@
 package com.pgleqi.model
 
 data class AppSettings(
-    val cookie: String = "",
+    var cookie: String = "",
 )

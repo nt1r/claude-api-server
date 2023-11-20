@@ -17,23 +17,23 @@ import kotlin.coroutines.CoroutineContext
 
 
 object AppService {
-    lateinit var appSettings: AppSettings
+    val appSettings: AppSettings = AppSettings()
 
     private var organizationId: String = ""
 
     internal fun init() {
         loadAppSettings()
-        getOrganizationId()
+        getOrganizationId(Dispatchers.IO)
     }
 
-    fun loadAppSettings() {
-        appSettings = FileService.readTextFile(FileService.APP_SETTINGS_FILE_PATH)?.let { json ->
-            gson.fromJson(json, AppSettings::class.java)
-        } ?: AppSettings()
+    private fun loadAppSettings() {
+        appSettings.cookie = FileService.readTextFile(FileService.APP_SETTINGS_FILE_PATH)?.let { json ->
+            gson.fromJson(json, AppSettings::class.java).cookie
+        } ?: ""
     }
 
-    private fun getOrganizationId() {
-        CoroutineScope(Dispatchers.IO).launch {
+    fun getOrganizationId(coroutineContext: CoroutineContext) {
+        CoroutineScope(coroutineContext).launch {
             try {
                 val response = baseHttpClient.get(organizationUrl) {
                     headers {
