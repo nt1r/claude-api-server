@@ -5,6 +5,7 @@ import com.pgleqi.constant.*
 import com.pgleqi.model.AppSettings
 import com.pgleqi.model.ChatMessage
 import com.pgleqi.model.Conversation
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -12,10 +13,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
+import kotlin.coroutines.CoroutineContext
 
 
 object AppService {
-    private lateinit var appSettings: AppSettings
+    lateinit var appSettings: AppSettings
 
     private var organizationId: String = ""
 
@@ -24,7 +26,7 @@ object AppService {
         getOrganizationId()
     }
 
-    private fun loadAppSettings() {
+    fun loadAppSettings() {
         appSettings = FileService.readTextFile(FileService.APP_SETTINGS_FILE_PATH)?.let { json ->
             gson.fromJson(json, AppSettings::class.java)
         } ?: AppSettings()
@@ -53,7 +55,7 @@ object AppService {
         }
     }
 
-    suspend fun getAllConversations(): List<Conversation> {
+    internal suspend fun getAllConversations(): List<Conversation> {
         try {
             val response = baseHttpClient.get(allConversationsUrl.format(organizationId)) {
                 headers {
@@ -72,7 +74,7 @@ object AppService {
         }
     }
 
-    suspend fun getConversationHistory(uuid: String): List<ChatMessage> {
+    internal suspend fun getConversationHistory(uuid: String): List<ChatMessage> {
         try {
             val response = baseHttpClient.get(conversationUrl.format(organizationId, uuid)) {
                 headers {
@@ -92,11 +94,32 @@ object AppService {
         }
     }
 
-    suspend fun createConversation() {
+    internal suspend fun createConversation(): Conversation? {
+        try {
+            val uuid = generateUUID()
+            val response = baseHttpClient.post(allConversationsUrl.format(organizationId)) {
+                headers {
+                    append(HttpHeaders.Cookie, appSettings.cookie)
+                }
 
+                contentType(ContentType.Application.Json)
+                setBody(Conversation(uuid = uuid, name = ""))
+            }
+
+            if (!response.status.isSuccess()) {
+                println("createConversation network error!")
+                println(response.bodyAsText())
+                return null
+            }
+
+            return response.body()
+        } catch (e: Exception) {
+            println(e)
+            return null
+        }
     }
 
-    suspend fun deleteConversation(uuid: String): Boolean {
+    internal suspend fun deleteConversation(uuid: String): Boolean {
         try {
             val response = baseHttpClient.delete(conversationUrl.format(organizationId, uuid)) {
                 headers {
@@ -114,6 +137,10 @@ object AppService {
             println(e.message)
             return false
         }
+    }
+
+    internal suspend fun sendMessage() {
+
     }
 
     private fun generateUUID(): String {

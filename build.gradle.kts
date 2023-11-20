@@ -1,4 +1,5 @@
 val kotlinVersion: String by project
+val ktorVersion: String by project
 val logbackVersion: String by project
 val swaggerUiVersion: String by project
 
@@ -34,6 +35,8 @@ dependencies {
     // ktor client
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-cio")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
 
     // swagger ui
     implementation("io.github.smiley4:ktor-swagger-ui:$swaggerUiVersion")

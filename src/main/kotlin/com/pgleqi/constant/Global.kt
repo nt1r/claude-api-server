@@ -5,7 +5,9 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
+import io.ktor.serialization.gson.*
 
 // gson
 val gsonBuilder: GsonBuilder = GsonBuilder().apply {
@@ -16,7 +18,11 @@ val gsonBuilder: GsonBuilder = GsonBuilder().apply {
 val gson: Gson = gsonBuilder.create()
 
 // http client
-val baseHttpClient: HttpClient = HttpClient(CIO).apply {
+val baseHttpClient: HttpClient = HttpClient(CIO) {
+    install(ContentNegotiation) {
+        gson()
+    }
+}.apply {
     headers {
         append(
             HttpHeaders.UserAgent,

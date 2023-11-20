@@ -3,6 +3,7 @@ package com.pgleqi.controller.plugins
 import com.pgleqi.service.AppService
 import io.github.smiley4.ktorswaggerui.dsl.delete
 import io.github.smiley4.ktorswaggerui.dsl.get
+import io.github.smiley4.ktorswaggerui.dsl.post
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -13,8 +14,13 @@ fun Application.configureRouting() {
         get("/conversations", {
             description = "Get all conversations Endpoint."
         }) {
-            val conversations = AppService.getAllConversations()
-            call.respond(conversations)
+            call.respond(AppService.getAllConversations())
+        }
+
+        post("/conversations", {
+            description = "Create new conversation Endpoint."
+        }) {
+            call.respond(AppService.createConversation() ?: "null")
         }
 
         get("/history/{uuid}", {
