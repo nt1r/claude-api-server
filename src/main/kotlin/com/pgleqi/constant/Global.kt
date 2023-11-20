@@ -3,7 +3,6 @@ package com.pgleqi.constant
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.http.*
@@ -15,7 +14,6 @@ val gsonBuilder: GsonBuilder = GsonBuilder().apply {
     setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
 }
 val gson: Gson = gsonBuilder.create()
-fun <T> gsonListTypeToken() = object : TypeToken<List<T>>() {}.type!!
 
 // http client
 val baseHttpClient: HttpClient = HttpClient(CIO).apply {

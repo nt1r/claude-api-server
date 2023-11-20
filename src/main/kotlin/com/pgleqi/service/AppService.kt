@@ -10,6 +10,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.*
 
 
 object AppService {
@@ -52,7 +53,7 @@ object AppService {
 
     suspend fun getAllConversations(): List<Conversation> {
         try {
-            val response = baseHttpClient.get(conversationUrl.format(organizationId)) {
+            val response = baseHttpClient.get(allConversationsUrl.format(organizationId)) {
                 headers {
                     append(HttpHeaders.Cookie, appSettings.cookie)
                 }
@@ -62,7 +63,7 @@ object AppService {
                 return emptyList()
             }
 
-            return gson.fromJson<List<Conversation>>(response.bodyAsText(), gsonListTypeToken<Conversation>()).toList()
+            return gson.fromJson(response.bodyAsText(), Array<Conversation>::class.java).toList()
         } catch (e: Exception) {
             println(e)
             return emptyList()
