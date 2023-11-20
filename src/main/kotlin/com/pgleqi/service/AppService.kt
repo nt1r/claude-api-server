@@ -38,13 +38,14 @@ object AppService {
                         append(HttpHeaders.Cookie, appSettings.cookie)
                     }
                 }
-                if (response.status != HttpStatusCode.OK) {
+                if (!response.status.isSuccess()) {
                     println("getOrganizationId network error!")
                     return@launch
                 }
 
                 val responseText = response.bodyAsText()
                 organizationId = JsonParser.parseString(responseText).asJsonArray[0].asJsonObject.get("uuid").asString
+                println("Organization ID: $organizationId")
             } catch (e: Exception) {
                 println(e)
                 println("Check if you are in unavailable region!")
@@ -59,7 +60,7 @@ object AppService {
                     append(HttpHeaders.Cookie, appSettings.cookie)
                 }
             }
-            if (response.status != HttpStatusCode.OK) {
+            if (!response.status.isSuccess()) {
                 println("getAllConversations network error!")
                 return emptyList()
             }
@@ -78,7 +79,7 @@ object AppService {
                     append(HttpHeaders.Cookie, appSettings.cookie)
                 }
             }
-            if (response.status != HttpStatusCode.OK) {
+            if (!response.status.isSuccess()) {
                 println("getConversationHistory network error!")
                 return emptyList()
             }
@@ -95,8 +96,24 @@ object AppService {
 
     }
 
-    suspend fun deleteConversation() {
+    suspend fun deleteConversation(uuid: String): Boolean {
+        try {
+            val response = baseHttpClient.delete(conversationUrl.format(organizationId, uuid)) {
+                headers {
+                    append(HttpHeaders.Cookie, appSettings.cookie)
+                }
 
+                setBody(uuid)
+            }
+            if (!response.status.isSuccess()) {
+                println("deleteConversation network error!")
+                return false
+            }
+            return true
+        } catch (e: Exception) {
+            println(e.message)
+            return false
+        }
     }
 
     private fun generateUUID(): String {
