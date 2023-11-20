@@ -3,6 +3,7 @@ package com.pgleqi.service
 import com.google.gson.JsonParser
 import com.pgleqi.constant.*
 import com.pgleqi.model.AppSettings
+import com.pgleqi.model.ChatMessage
 import com.pgleqi.model.Conversation
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -68,5 +69,37 @@ object AppService {
             println(e)
             return emptyList()
         }
+    }
+
+    suspend fun getConversationHistory(uuid: String): List<ChatMessage> {
+        try {
+            val response = baseHttpClient.get(conversationUrl.format(organizationId, uuid)) {
+                headers {
+                    append(HttpHeaders.Cookie, appSettings.cookie)
+                }
+            }
+            if (response.status != HttpStatusCode.OK) {
+                println("getConversationHistory network error!")
+                return emptyList()
+            }
+
+            val messagesJson = JsonParser.parseString(response.bodyAsText()).asJsonObject.get("chat_messages").asJsonArray.toString()
+            return gson.fromJson(messagesJson, Array<ChatMessage>::class.java).toList()
+        } catch (e: Exception) {
+            println(e)
+            return emptyList()
+        }
+    }
+
+    suspend fun createConversation() {
+
+    }
+
+    suspend fun deleteConversation() {
+
+    }
+
+    private fun generateUUID(): String {
+        return UUID.randomUUID().toString()
     }
 }
