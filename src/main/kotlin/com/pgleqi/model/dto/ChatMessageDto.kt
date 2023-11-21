@@ -1,8 +1,8 @@
-package com.pgleqi.model
+package com.pgleqi.model.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class ChatMessage(
+data class ChatMessageDto(
     val uuid: String,
     val text: String,
     val sender: Sender,

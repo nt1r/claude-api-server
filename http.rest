@@ -43,6 +43,21 @@ Cookie: {{cookie}}
 
 ###
 
+POST http://localhost:8001/conversation/5010ba66-664a-4fbe-a448-f56f2d1eef9a
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+Accept-Language: en-US,en;q=0.5
+Referer: https://claude.ai/chats
+Content-Type: text/plain
+Connection: keep-alive
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+Cookie: {{cookie}}
+
+你的名字
+
+###
+
 DELETE http://localhost:8001/conversation/35418077-3d49-497e-a0e7-c1d4c5bedf51
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
 Accept-Language: en-US,en;q=0.5

@@ -19,8 +19,14 @@ val gson: Gson = gsonBuilder.create()
 
 // http client
 val baseHttpClient: HttpClient = HttpClient(CIO) {
+    engine {
+        requestTimeout = 0
+    }
+
     install(ContentNegotiation) {
-        gson()
+        gson() {
+            setPrettyPrinting()
+        }
     }
 }.apply {
     headers {

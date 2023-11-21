@@ -1,17 +1,25 @@
 package com.pgleqi.service
 
+import com.google.gson.JsonNull
 import com.google.gson.JsonParser
 import com.pgleqi.constant.*
 import com.pgleqi.model.AppSettings
-import com.pgleqi.model.ChatMessage
-import com.pgleqi.model.Conversation
+import com.pgleqi.model.dto.ChatMessageDto
+import com.pgleqi.model.dto.ConversationDto
+import com.pgleqi.model.dto.TokenStreamDto
+import com.pgleqi.model.payload.AppendMessagePayload
+import com.pgleqi.model.payload.Completion
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.utils.io.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.Writer
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
@@ -55,7 +63,7 @@ object AppService {
         }
     }
 
-    internal suspend fun getAllConversations(): List<Conversation> {
+    internal suspend fun getAllConversations(): List<ConversationDto> {
         try {
             val response = baseHttpClient.get(allConversationsUrl.format(organizationId)) {
                 headers {
@@ -67,14 +75,14 @@ object AppService {
                 return emptyList()
             }
 
-            return gson.fromJson(response.bodyAsText(), Array<Conversation>::class.java).toList()
+            return gson.fromJson(response.bodyAsText(), Array<ConversationDto>::class.java).toList()
         } catch (e: Exception) {
             println(e)
             return emptyList()
         }
     }
 
-    internal suspend fun getConversationHistory(uuid: String): List<ChatMessage> {
+    internal suspend fun getConversationHistory(uuid: String): List<ChatMessageDto> {
         try {
             val response = baseHttpClient.get(conversationUrl.format(organizationId, uuid)) {
                 headers {
@@ -87,23 +95,23 @@ object AppService {
             }
 
             val messagesJson = JsonParser.parseString(response.bodyAsText()).asJsonObject.get("chat_messages").asJsonArray.toString()
-            return gson.fromJson(messagesJson, Array<ChatMessage>::class.java).toList()
+            return gson.fromJson(messagesJson, Array<ChatMessageDto>::class.java).toList()
         } catch (e: Exception) {
             println(e)
             return emptyList()
         }
     }
 
-    internal suspend fun createConversation(): Conversation? {
+    internal suspend fun createConversation(): ConversationDto? {
         try {
-            val uuid = generateUUID()
+            val uuid = generateUuid()
             val response = baseHttpClient.post(allConversationsUrl.format(organizationId)) {
                 headers {
                     append(HttpHeaders.Cookie, appSettings.cookie)
                 }
 
                 contentType(ContentType.Application.Json)
-                setBody(Conversation(uuid = uuid, name = ""))
+                setBody(ConversationDto(uuid = uuid, name = ""))
             }
 
             if (!response.status.isSuccess()) {
@@ -139,11 +147,51 @@ object AppService {
         }
     }
 
-    internal suspend fun sendMessage() {
+    internal suspend fun sendMessage(uuid: String, message: String, writer: Writer) {
+        try {
+            baseHttpClient.preparePost(chatMessageUrl) {
+                headers {
+                    append(HttpHeaders.Accept, "text/event-stream")
+                    append(HttpHeaders.Referrer, chatMessageReferrerUrl.format(uuid))
+                    append(HttpHeaders.Origin, "https://claude.ai")
+                    append(HttpHeaders.Cookie, appSettings.cookie)
+                }
 
+                setBody(
+                    gson.toJson(
+                        AppendMessagePayload(
+                            completion = Completion(prompt = message),
+                            conversationUuid = uuid,
+                            organizationUuid = organizationId,
+                            text = message,
+                        )
+                    )
+                )
+            }.execute { response ->
+                if (!response.status.isSuccess()) {
+                    println("sendMessage network error!")
+                    println(response.bodyAsText())
+                    return@execute
+                }
+
+                val channel: ByteReadChannel = response.bodyAsChannel()
+                while (!channel.isClosedForRead) {
+                    val lineStr = channel.readUTF8Line() ?: ""
+                    if (lineStr.isNotEmpty()) {
+                        val dataJson = lineStr.substring("data: ".length)
+                        val tokenDto = gson.fromJson(dataJson, TokenStreamDto::class.java)
+                        val tidyJson = gson.toJson(tokenDto)
+                        writer.write("$tidyJson\n")
+                    }
+                }
+                writer.close()
+            }
+        } catch (e: Exception) {
+            println(e.message)
+        }
     }
 
-    private fun generateUUID(): String {
+    private fun generateUuid(): String {
         return UUID.randomUUID().toString()
     }
 }

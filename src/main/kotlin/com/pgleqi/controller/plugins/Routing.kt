@@ -6,6 +6,7 @@ import io.github.smiley4.ktorswaggerui.dsl.get
 import io.github.smiley4.ktorswaggerui.dsl.post
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
@@ -38,6 +39,17 @@ fun Application.configureRouting() {
                 val isSuccess = AppService.deleteConversation(uuid)
                 call.response.status(if (isSuccess) HttpStatusCode.OK else HttpStatusCode.InternalServerError)
             } ?: call.response.status(HttpStatusCode.BadRequest)
+        }
+
+        post("/conversation/{uuid}", {
+            description = "Append message to conversation Endpoint."
+        }) {
+            call.parameters["uuid"]?.let { uuid ->
+                val message = call.receiveText()
+                call.respondTextWriter {
+                    AppService.sendMessage(uuid, message, this)
+                }
+            }
         }
     }
 }
