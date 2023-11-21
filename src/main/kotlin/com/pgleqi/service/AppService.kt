@@ -1,6 +1,6 @@
 package com.pgleqi.service
 
-import com.google.gson.JsonNull
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.pgleqi.constant.*
 import com.pgleqi.model.AppSettings
@@ -9,6 +9,7 @@ import com.pgleqi.model.dto.ConversationDto
 import com.pgleqi.model.dto.TokenStreamDto
 import com.pgleqi.model.payload.AppendMessagePayload
 import com.pgleqi.model.payload.Completion
+import com.pgleqi.model.payload.GenerateTitlePayload
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -16,9 +17,7 @@ import io.ktor.http.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.Writer
 import java.util.*
 import kotlin.coroutines.CoroutineContext
@@ -127,6 +126,44 @@ object AppService {
         }
     }
 
+    internal suspend fun generateTitle(uuid: String, message: String): String {
+        try {
+            val payload = GenerateTitlePayload(
+                organizationUuid = organizationId,
+                conversationUuid = uuid,
+                messageContent = message,
+            )
+            /*val payloadLength = gson.toJson(payload).toByteArray().size
+            println(payloadLength)*/
+
+            val response = baseHttpClient.post(generateTitleUrl) {
+                headers {
+                    append(HttpHeaders.Accept, "*/*")
+                    /*append(HttpHeaders.AcceptEncoding, "gzip, deflate, br")
+                    append(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7")*/
+                    /*append(HttpHeaders.ContentType, "application/json")*/
+                    /*append(HttpHeaders.ContentLength, payloadLength.toString())*/
+                    append(HttpHeaders.Referrer, chatReferrerUrl.format(uuid))
+                    append(HttpHeaders.Origin, "https://claude.ai")
+                    append(HttpHeaders.Cookie, appSettings.cookie)
+                }
+                setBody(payload)
+            }
+            println(response.request.headers)
+            if (!response.status.isSuccess()) {
+                println("generateTitle network error!")
+                println(response.bodyAsText())
+                return ""
+            }
+
+            println(response.bodyAsText())
+            return (JsonParser.parseString(response.bodyAsText()) as JsonObject).get("title").asString
+        } catch (e: Exception) {
+            println(e)
+            return ""
+        }
+    }
+
     internal suspend fun deleteConversation(uuid: String): Boolean {
         try {
             val response = baseHttpClient.delete(conversationUrl.format(organizationId, uuid)) {
@@ -151,8 +188,8 @@ object AppService {
         try {
             baseHttpClient.preparePost(chatMessageUrl) {
                 headers {
-                    append(HttpHeaders.Accept, "text/event-stream")
-                    append(HttpHeaders.Referrer, chatMessageReferrerUrl.format(uuid))
+                    append(HttpHeaders.Accept, "text/event-stream, text/event-stream")
+                    append(HttpHeaders.Referrer, chatReferrerUrl.format(uuid))
                     append(HttpHeaders.Origin, "https://claude.ai")
                     append(HttpHeaders.Cookie, appSettings.cookie)
                 }
@@ -181,10 +218,10 @@ object AppService {
                         val dataJson = lineStr.substring("data: ".length)
                         val tokenDto = gson.fromJson(dataJson, TokenStreamDto::class.java)
                         val tidyJson = gson.toJson(tokenDto)
+                        println(tidyJson)
                         writer.write("$tidyJson\n")
                     }
                 }
-                writer.close()
             }
         } catch (e: Exception) {
             println(e.message)

@@ -24,7 +24,7 @@ fun Application.configureRouting() {
             call.respond(AppService.createConversation() ?: "null")
         }
 
-        get("/history/{uuid}", {
+        get("/conversation-history/{uuid}", {
             description = "Get conversation history Endpoint."
         }) {
             call.parameters["uuid"]?.let { uuid ->
@@ -49,6 +49,15 @@ fun Application.configureRouting() {
                 call.respondTextWriter {
                     AppService.sendMessage(uuid, message, this)
                 }
+            }
+        }
+
+        post("/generate-conversation-title/{uuid}", {
+            description = "Generate conversation Endpoint."
+        }) {
+            call.parameters["uuid"]?.let { uuid ->
+                val message = call.receiveText()
+                call.respondText(AppService.generateTitle(uuid, message))
             }
         }
     }
