@@ -9,6 +9,7 @@ import com.pgleqi.model.dto.ConversationDto
 import com.pgleqi.model.dto.TokenStreamDto
 import com.pgleqi.model.payload.AppendMessagePayload
 import com.pgleqi.model.payload.Completion
+import com.pgleqi.model.payload.ConversationPayload
 import com.pgleqi.model.payload.GenerateTitlePayload
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -110,7 +111,7 @@ object AppService {
                 }
 
                 contentType(ContentType.Application.Json)
-                setBody(ConversationDto(uuid = uuid, name = ""))
+                setBody(ConversationPayload(uuid = uuid, name = ""))
             }
 
             if (!response.status.isSuccess()) {
@@ -133,16 +134,10 @@ object AppService {
                 conversationUuid = uuid,
                 messageContent = message,
             )
-            /*val payloadLength = gson.toJson(payload).toByteArray().size
-            println(payloadLength)*/
 
             val response = baseHttpClient.post(generateTitleUrl) {
                 headers {
                     append(HttpHeaders.Accept, "*/*")
-                    /*append(HttpHeaders.AcceptEncoding, "gzip, deflate, br")
-                    append(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7")*/
-                    /*append(HttpHeaders.ContentType, "application/json")*/
-                    /*append(HttpHeaders.ContentLength, payloadLength.toString())*/
                     append(HttpHeaders.Referrer, chatReferrerUrl.format(uuid))
                     append(HttpHeaders.Origin, "https://claude.ai")
                     append(HttpHeaders.Cookie, appSettings.cookie)
