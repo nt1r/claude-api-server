@@ -7,11 +7,13 @@ data class ChatMessageDto(
     val text: String,
     val sender: Sender,
     val index: Int,
+    val updatedAt: String,
 )
 
 enum class Sender {
     @SerializedName("human")
     Human,
+
     @SerializedName("assistant")
     Assistant,
 }

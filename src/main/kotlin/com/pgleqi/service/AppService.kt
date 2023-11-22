@@ -213,7 +213,6 @@ object AppService {
                         val dataJson = lineStr.substring("data: ".length)
                         val tokenDto = gson.fromJson(dataJson, TokenStreamDto::class.java)
                         val tidyJson = gson.toJson(tokenDto)
-                        println(tidyJson)
                         writer.write("$tidyJson\n")
                     }
                 }
