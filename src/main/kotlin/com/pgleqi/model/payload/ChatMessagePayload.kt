@@ -11,5 +11,5 @@ data class AppendMessagePayload(
 data class Completion(
     val prompt: String,
     val timezone: String = "Asia/Shanghai",
-    val model: String = "claude-2.0-magenta"
+    val model: String = "claude-2.1"
 )
