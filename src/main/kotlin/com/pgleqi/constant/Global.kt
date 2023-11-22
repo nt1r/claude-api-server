@@ -4,6 +4,7 @@ import com.google.gson.FieldNamingPolicy
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import io.ktor.client.*
+import io.ktor.client.engine.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
@@ -21,6 +22,7 @@ val gson: Gson = gsonBuilder.create()
 val baseHttpClient: HttpClient = HttpClient(CIO) {
     engine {
         requestTimeout = 0
+        proxy = ProxyBuilder.http("http://127.0.0.1:8889")
     }
 
     install(ContentNegotiation) {
