@@ -50,7 +50,7 @@ Sec-Fetch-Mode: cors
 Sec-Fetch-Site: same-origin
 Cookie: {{cookie}}
 
-你的名字
+What's your name?
 
 ###
 

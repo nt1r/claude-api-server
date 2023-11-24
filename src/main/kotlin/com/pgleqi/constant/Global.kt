@@ -28,6 +28,8 @@ val baseHttpClient: HttpClient = HttpClient(CIO) {
     install(ContentNegotiation) {
         gson() {
             setPrettyPrinting()
+            setLenient()
+            setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
         }
     }
 }.apply {

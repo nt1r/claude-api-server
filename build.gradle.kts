@@ -1,7 +1,6 @@
 val kotlinVersion: String by project
 val ktorVersion: String by project
 val logbackVersion: String by project
-val swaggerUiVersion: String by project
 
 plugins {
     kotlin("jvm")
@@ -37,10 +36,6 @@ dependencies {
     implementation("io.ktor:ktor-client-cio")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
-
-    // swagger ui
-    implementation("io.github.smiley4:ktor-swagger-ui:$swaggerUiVersion")
-
 
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")

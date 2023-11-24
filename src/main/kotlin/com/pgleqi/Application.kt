@@ -17,7 +17,6 @@ fun Application.module() {
     configureMonitoring()
     configureSerialization()
     configureRouting()
-    configureSwaggerUi()
 
     AppService.init()
 }
